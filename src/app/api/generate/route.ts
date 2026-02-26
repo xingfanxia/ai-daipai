@@ -69,45 +69,50 @@ export async function POST(request: NextRequest) {
 
         send("started", { sessionId, totalPhotos: parsed.count });
 
-        let successful = 0;
-        let failed = 0;
-
-        for (let i = 0; i < parsed.count; i++) {
-          send("photo_started", { index: i });
-
+        // Fire all generation requests in parallel
+        const promises = poses.map((pose, i) => {
           const prompt = buildPrompt({
             sceneDescription,
             hasCustomSceneImages: sceneImages.length > 0,
-            pose: poses[i],
+            pose,
             style: parsed.style,
             outfit: outfitText,
             mood: moodText,
             refCount: refImages.length,
           });
 
-          const result = await generateSinglePhoto({
+          return generateSinglePhoto({
             apiKey,
             prompt,
             refImages,
             sceneImages: sceneImages.length > 0 ? sceneImages : undefined,
             index: i,
-          });
+          }).then((result) => ({ index: i, result }));
+        });
 
-          if ("error" in result) {
-            failed++;
-            send("photo_failed", { index: i, error: result.error });
-          } else {
-            // Return generated image as base64 data URL (no filesystem dependency)
-            const b64 = result.imageData.toString("base64");
-            const dataUrl = `data:image/png;base64,${b64}`;
-            successful++;
-            send("photo_completed", {
-              index: i,
-              imageId: result.id,
-              previewUrl: dataUrl,
-            });
-          }
-        }
+        // Stream results as they complete
+        let successful = 0;
+        let failed = 0;
+        const pending = promises.map((p) =>
+          p.then((res) => {
+            const { index: i, result } = res;
+            if ("error" in result) {
+              failed++;
+              send("photo_failed", { index: i, error: result.error });
+            } else {
+              const b64 = result.imageData.toString("base64");
+              const dataUrl = `data:image/png;base64,${b64}`;
+              successful++;
+              send("photo_completed", {
+                index: i,
+                imageId: result.id,
+                previewUrl: dataUrl,
+              });
+            }
+          }),
+        );
+
+        await Promise.allSettled(pending);
 
         send("completed", { successful, failed, total: parsed.count });
         controller.close();
