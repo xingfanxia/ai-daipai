@@ -1,8 +1,10 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
+import os from "node:os";
 
-const STORAGE_DIR = path.join(process.cwd(), "generated");
+// Vercel serverless: only /tmp is writable
+const STORAGE_DIR = path.join(os.tmpdir(), "ai-daipai-images");
 
 export async function ensureStorageDir(): Promise<void> {
   await fs.mkdir(STORAGE_DIR, { recursive: true });

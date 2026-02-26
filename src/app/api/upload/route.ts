@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { preprocessImage } from "@/lib/images/preprocessing";
 import { saveImage, getImageUrl } from "@/lib/images/storage";
 
+// Vercel serverless body size limit (App Router)
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -11,14 +14,23 @@ export async function POST(request: NextRequest) {
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
-    if (!slot || !["headshot", "halfbody", "fullbody", "scene"].includes(slot)) {
+    if (
+      !slot ||
+      !["headshot", "halfbody", "fullbody", "scene"].includes(slot)
+    ) {
       return NextResponse.json({ error: "Invalid slot" }, { status: 400 });
     }
     if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json({ error: "File too large (max 10MB)" }, { status: 400 });
+      return NextResponse.json(
+        { error: "File too large (max 10MB)" },
+        { status: 400 },
+      );
     }
     if (!file.type.startsWith("image/")) {
-      return NextResponse.json({ error: "Only images allowed" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Only images allowed" },
+        { status: 400 },
+      );
     }
 
     const arrayBuffer = await file.arrayBuffer();
@@ -39,9 +51,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     console.error("[upload] error:", err);
-    return NextResponse.json(
-      { error: "Upload failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }

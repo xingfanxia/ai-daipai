@@ -10,6 +10,9 @@ import { getOutfitPreset } from "@/lib/presets/outfits";
 import { getMoodOption } from "@/lib/presets/moods";
 import { generateRequestSchema } from "@/lib/schemas";
 
+// 8 photos × ~60s each = ~8 min max
+export const maxDuration = 600;
+
 function sseEvent(event: string, data: unknown): string {
   return `data: ${JSON.stringify({ event, data })}\n\n`;
 }

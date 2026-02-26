@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Upload, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,26 +27,41 @@ export function UploadZone({
 }: UploadZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile("ontouchstart" in window || navigator.maxTouchPoints > 0);
+  }, []);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
+      e.stopPropagation();
       setIsDragOver(false);
       const file = e.dataTransfer.files[0];
       if (file && file.type.startsWith("image/")) {
         onUpload(file);
       }
     },
-    [onUpload]
+    [onUpload],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragOver(true);
   }, []);
 
-  const handleDragLeave = useCallback(() => {
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsDragOver(false);
+  }, []);
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
   }, []);
 
   const handleFileChange = useCallback(
@@ -58,7 +73,7 @@ export function UploadZone({
       // Reset input so same file can be re-selected
       e.target.value = "";
     },
-    [onUpload]
+    [onUpload],
   );
 
   if (image) {
@@ -72,8 +87,8 @@ export function UploadZone({
         />
         <Button
           variant="destructive"
-          size="icon-xs"
-          className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100"
+          size="sm"
+          className="absolute right-2 top-2 size-7 opacity-0 transition-opacity group-hover:opacity-100"
           onClick={onRemove}
         >
           <X className="size-3" />
@@ -95,12 +110,13 @@ export function UploadZone({
       }}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       className={cn(
         "flex aspect-[3/4] cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed transition-colors",
         isDragOver
           ? "border-primary bg-primary/5"
-          : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
+          : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50",
       )}
     >
       {isUploading ? (
@@ -126,7 +142,7 @@ export function UploadZone({
         ref={inputRef}
         type="file"
         accept="image/*"
-        capture="environment"
+        capture={isMobile ? "environment" : undefined}
         className="hidden"
         onChange={handleFileChange}
       />
