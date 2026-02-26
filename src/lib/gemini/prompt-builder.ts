@@ -10,79 +10,65 @@ export interface PromptOptions {
   refCount: number;
 }
 
+/**
+ * Build the generation prompt.
+ * Ported verbatim from openclaw extensions/photoshoot/index.ts buildPrompt().
+ */
 export function buildPrompt(opts: PromptOptions): string {
-  const lines: string[] = [];
-
-  // Face preservation preamble
-  lines.push(
-    `I'm providing ${opts.refCount} reference photo(s) of a person.`,
-    "Study these reference photos carefully and preserve their EXACT facial features:",
-    "- Eyes (shape, size, spacing, double/single eyelid)",
-    "- Nose (bridge height, tip shape, nostril width)",
-    "- Lips (thickness, shape, cupid's bow)",
-    "- Face shape (jawline, cheekbones, chin)",
-    "- Skin tone and skin quality",
-    "- Hair (color, texture, length, style)",
+  // Face preservation preamble — exact wording from extension
+  const face = [
+    `These ${opts.refCount} reference photo(s) show the person — preserve their exact facial features,`,
+    "eyes, nose, lips, face shape, skin tone, and hair.",
+    "Skin quality should look well-maintained and clear from consistent skincare: natural texture is fine,",
+    "but avoid obvious acne clusters, inflamed red breakouts, or prominent irritation patches on the face.",
     "",
-  );
-
-  // Body consistency
-  lines.push(
-    "Body consistency:",
-    "- Match the body type, build, and proportions visible in the reference photos",
-    "- Maintain consistent body shape throughout",
+    "BODY: match the person's body type, build, and proportions as visible in the reference photos.",
+    "Do NOT idealize, exaggerate, or change their body shape. Keep it realistic to the reference.",
     "",
-  );
+    "IDENTITY LOCK: this is always the same person from the reference photos.",
+    "Do not drift identity, age, ethnicity, body type, or core proportions between generations.",
+  ];
 
-  // Identity lock
-  lines.push(
-    "IDENTITY LOCK: This must be the SAME person as in the reference photos.",
-    "No identity drift — facial features must match exactly.",
-    "",
-  );
-
-  // Style notes
+  // Style notes from preset
   const stylePreset = getStylePreset(opts.style);
-  if (stylePreset) {
-    lines.push(...stylePreset.promptLines, "");
-  }
+  const styleLines = stylePreset?.promptLines ?? [];
 
   // Scene section
+  const sceneLines: string[] = [];
   if (opts.hasCustomSceneImages) {
-    lines.push(
+    sceneLines.push(
       "Scene: Use the uploaded scene reference photo(s) as the exact background and environment.",
       "Place this person naturally in that scene.",
       "Match the lighting, color temperature, and atmosphere of the scene photo.",
     );
     if (opts.sceneDescription) {
-      lines.push(`Additional scene context: ${opts.sceneDescription}`);
+      sceneLines.push(`Additional scene context: ${opts.sceneDescription}`);
     }
   } else {
-    lines.push(`Location/scene: ${opts.sceneDescription}`);
-  }
-  lines.push("");
-
-  // Pose
-  lines.push(`Pose: ${opts.pose}`);
-
-  // Outfit
-  if (opts.outfit) {
-    lines.push(`Outfit: ${opts.outfit}`);
+    sceneLines.push(`Location/scene: ${opts.sceneDescription}`);
   }
 
-  // Mood
-  if (opts.mood) {
-    lines.push(`Mood/expression: ${opts.mood}`);
-  }
+  // Outfit and mood — match extension format
+  const outfitLine = opts.outfit
+    ? `Outfit: ${opts.outfit}`
+    : "Outfit: stylish, flattering, appropriate for the location and style.";
 
-  lines.push("");
+  const moodLine = opts.mood
+    ? `Mood/vibe: ${opts.mood}`
+    : "Mood/vibe: confident, natural, photogenic.";
 
-  // Realism footer
-  lines.push(
-    "IMPORTANT: Generate ONE photorealistic image of this person in the described scene.",
-    "This must look like a real photograph, not AI-generated art.",
-    "Preserve the person's identity perfectly — they must be recognizable as the same individual from the reference photos.",
-  );
-
-  return lines.join("\n");
+  return [
+    ...face,
+    "",
+    ...styleLines,
+    "",
+    ...sceneLines,
+    `Pose: ${opts.pose}`,
+    outfitLine,
+    moodLine,
+    "",
+    "IMPORTANT: Generate ONE photorealistic image of this person in this exact scene.",
+    "The photo should look like a real photograph, not AI art.",
+    "Preserve the person's identity perfectly from the reference images.",
+  ].join("\n");
 }
