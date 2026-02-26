@@ -14,6 +14,7 @@ export function WizardShell() {
   const referenceImages = useCreationStore((s) => s.referenceImages);
   const scene = useCreationStore((s) => s.scene);
   const generationStatus = useCreationStore((s) => s.generationStatus);
+  const setGenerationStatus = useCreationStore((s) => s.setGenerationStatus);
 
   const hasHeadshot = !!referenceImages.headshot;
   const hasScene = !!scene;
@@ -24,12 +25,20 @@ export function WizardShell() {
 
   const handleBack = () => {
     if (currentStep > 1) {
+      // Reset generation state so returning to step 3 starts fresh
+      if (currentStep === 3) {
+        setGenerationStatus("idle");
+      }
       setStep((currentStep - 1) as 1 | 2 | 3);
     }
   };
 
   const handleNext = () => {
     if (currentStep < 3 && canProceed) {
+      // Reset generation state when entering step 3 with new settings
+      if (currentStep === 2) {
+        setGenerationStatus("idle");
+      }
       setStep((currentStep + 1) as 1 | 2 | 3);
     }
   };
