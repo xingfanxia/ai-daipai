@@ -26,7 +26,7 @@ export const STYLE_PRESETS: StylePreset[] = [
       "- Subtle beauty filter — skin is smooth and luminous but not plastic",
       "- Warm color grading, slightly lifted shadows, soft contrast (like VSCO or Ulike filter)",
       "- NOT overly edited or AI-looking — real but polished",
-      '- Composition feels intentionally casual (摆拍) — "effortlessly pretty"',
+      "- Composition feels intentionally casual (摆拍) — 'effortlessly pretty'",
       "- 小红书/抖音 Chinese internet aesthetic",
       "- The person is photogenic and knows their angles",
     ],

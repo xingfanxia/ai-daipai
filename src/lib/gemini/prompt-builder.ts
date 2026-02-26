@@ -3,6 +3,7 @@ import { getStylePreset } from "@/lib/presets/styles";
 export interface PromptOptions {
   sceneDescription: string;
   hasCustomSceneImages: boolean;
+  hasInspirationImages: boolean;
   pose: string;
   style: string;
   outfit: string | null;
@@ -29,9 +30,29 @@ export function buildPrompt(opts: PromptOptions): string {
     "Do not drift identity, age, ethnicity, body type, or core proportions between generations.",
   ];
 
-  // Style notes from preset
+  // Inspiration reference (抄作业)
+  const inspirationLines: string[] = [];
+  if (opts.hasInspirationImages) {
+    inspirationLines.push(
+      "STYLE REFERENCE (灵感图/抄作业):",
+      "The inspiration photo(s) show the TARGET LOOK you must recreate.",
+      "Match these elements from the inspiration:",
+      "- Composition & framing (camera angle, distance, crop style)",
+      "- Lighting direction, quality, and mood",
+      "- Color grading & filter style (warm/cool, contrast, saturation)",
+      "- Pose style and body language (similar energy, not exact copy)",
+      "- Overall atmosphere and aesthetic vibe",
+      "- Clothing style (similar category/vibe unless outfit is specified separately)",
+      "",
+      "DO NOT copy the face/identity from the inspiration photo.",
+      "The person must be from the reference photos ONLY.",
+      "The inspiration photo is ONLY for style, composition, and mood reference.",
+    );
+  }
+
+  // Style notes from preset (skip if inspiration images provide the style)
   const stylePreset = getStylePreset(opts.style);
-  const styleLines = stylePreset?.promptLines ?? [];
+  const styleLines = opts.hasInspirationImages ? [] : (stylePreset?.promptLines ?? []);
 
   // Scene section
   const sceneLines: string[] = [];
@@ -60,8 +81,8 @@ export function buildPrompt(opts: PromptOptions): string {
   return [
     ...face,
     "",
-    ...styleLines,
-    "",
+    ...(inspirationLines.length > 0 ? [...inspirationLines, ""] : []),
+    ...(styleLines.length > 0 ? [...styleLines, ""] : []),
     ...sceneLines,
     `Pose: ${opts.pose}`,
     outfitLine,

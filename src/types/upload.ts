@@ -1,4 +1,4 @@
-export type UploadSlot = "headshot" | "halfbody" | "fullbody" | "scene";
+export type UploadSlot = "headshot" | "halfbody" | "fullbody" | "scene" | "inspiration";
 
 export interface UploadedImage {
   id: string;

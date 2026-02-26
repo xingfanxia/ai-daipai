@@ -40,6 +40,12 @@ export async function POST(request: NextRequest) {
       data: b64,
     }));
 
+    // Inspiration images (抄作业)
+    const inspirationImages = (parsed.inspirationImages ?? []).map((b64) => ({
+      mimeType: "image/jpeg",
+      data: b64,
+    }));
+
     // Resolve scene description
     let sceneDescription = "";
     if (parsed.sceneType === "preset" && parsed.scenePresetId) {
@@ -74,6 +80,7 @@ export async function POST(request: NextRequest) {
           const prompt = buildPrompt({
             sceneDescription,
             hasCustomSceneImages: sceneImages.length > 0,
+            hasInspirationImages: inspirationImages.length > 0,
             pose,
             style: parsed.style,
             outfit: outfitText,
@@ -85,6 +92,7 @@ export async function POST(request: NextRequest) {
             apiKey,
             prompt,
             refImages,
+            inspirationImages: inspirationImages.length > 0 ? inspirationImages : undefined,
             sceneImages: sceneImages.length > 0 ? sceneImages : undefined,
             index: i,
           }).then((result) => ({ index: i, result }));

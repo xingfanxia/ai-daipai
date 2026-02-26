@@ -3,6 +3,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { PackageGrid } from "./package-grid";
+import { InspirationPicker } from "./inspiration-picker";
 import { ScenePicker } from "./scene-picker";
 import { StylePicker } from "./style-picker";
 import { OutfitPicker } from "./outfit-picker";
@@ -35,6 +36,16 @@ export function CustomizeStep() {
 
         <TabsContent value="custom" className="mt-4">
           <div className="flex flex-col gap-6">
+            {/* Inspiration — 抄作业 */}
+            <section>
+              <h3 className="mb-3 text-base font-semibold">
+                💡 灵感图 Inspiration
+              </h3>
+              <InspirationPicker />
+            </section>
+
+            <Separator />
+
             {/* Scene */}
             <section>
               <h3 className="mb-3 text-base font-semibold">

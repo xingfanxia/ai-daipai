@@ -5,6 +5,8 @@ export interface GenerationConfig {
   referenceImages: string[];
   /** base64-encoded JPEG image data for custom scene photos */
   sceneImages?: string[];
+  /** base64-encoded JPEG image data for inspiration/style reference photos (抄作业) */
+  inspirationImages?: string[];
   sceneType: "preset" | "custom";
   scenePresetId?: string;
   sceneDescription?: string;
