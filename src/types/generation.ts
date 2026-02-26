@@ -1,8 +1,10 @@
 export type GenerationStatus = "idle" | "generating" | "completed" | "error";
 
 export interface GenerationConfig {
-  referenceImageIds: string[];
-  sceneImageIds?: string[];
+  /** base64-encoded JPEG image data for reference photos */
+  referenceImages: string[];
+  /** base64-encoded JPEG image data for custom scene photos */
+  sceneImages?: string[];
   sceneType: "preset" | "custom";
   scenePresetId?: string;
   sceneDescription?: string;

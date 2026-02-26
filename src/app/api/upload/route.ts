@@ -38,12 +38,16 @@ export async function POST(request: NextRequest) {
     const processed = await preprocessImage(buffer);
     const id = await saveImage(processed.buffer, slot);
 
+    // Return base64 directly (serverless instances don't share /tmp)
+    const base64 = processed.buffer.toString("base64");
+    const dataUrl = `data:${processed.mimeType};base64,${base64}`;
+
     return NextResponse.json({
       image: {
         id,
         slot,
-        previewUrl: getImageUrl(id),
-        storedPath: id,
+        previewUrl: dataUrl,
+        base64,
         width: processed.width,
         height: processed.height,
         sizeKB: processed.sizeKB,

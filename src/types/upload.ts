@@ -4,7 +4,8 @@ export interface UploadedImage {
   id: string;
   slot: UploadSlot;
   previewUrl: string;
-  storedPath: string;
+  /** base64-encoded image data (JPEG) for sending to generation API */
+  base64: string;
   width: number;
   height: number;
   sizeKB: number;

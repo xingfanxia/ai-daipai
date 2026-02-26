@@ -2,8 +2,6 @@ import { NextRequest } from "next/server";
 import crypto from "node:crypto";
 import { generateSinglePhoto } from "@/lib/gemini/generate-photo";
 import { buildPrompt } from "@/lib/gemini/prompt-builder";
-import { getImageBuffer, saveGeneratedImage, getImageUrl } from "@/lib/images/storage";
-import { imageToBase64 } from "@/lib/images/preprocessing";
 import { selectPoses } from "@/lib/presets/poses";
 import { getScenePreset } from "@/lib/presets/scenes";
 import { getOutfitPreset } from "@/lib/presets/outfits";
@@ -24,33 +22,23 @@ export async function POST(request: NextRequest) {
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "GEMINI_API_KEY not configured" }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "GEMINI_API_KEY not configured" }),
+        { status: 500, headers: { "Content-Type": "application/json" } },
+      );
     }
 
-    // Load reference images
-    const refImages: Array<{ mimeType: string; data: string }> = [];
-    for (const id of parsed.referenceImageIds) {
-      const buf = await getImageBuffer(id);
-      if (!buf) {
-        return new Response(JSON.stringify({ error: `Reference image ${id} not found` }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-      refImages.push(imageToBase64(buf));
-    }
+    // Reference images arrive as base64 strings from the client
+    const refImages = parsed.referenceImages.map((b64) => ({
+      mimeType: "image/jpeg",
+      data: b64,
+    }));
 
-    // Load scene images (for custom scenes)
-    const sceneImages: Array<{ mimeType: string; data: string }> = [];
-    if (parsed.sceneType === "custom" && parsed.sceneImageIds?.length) {
-      for (const id of parsed.sceneImageIds) {
-        const buf = await getImageBuffer(id);
-        if (buf) sceneImages.push(imageToBase64(buf));
-      }
-    }
+    // Scene images for custom scenes
+    const sceneImages = (parsed.sceneImages ?? []).map((b64) => ({
+      mimeType: "image/jpeg",
+      data: b64,
+    }));
 
     // Resolve scene description
     let sceneDescription = "";
@@ -109,12 +97,14 @@ export async function POST(request: NextRequest) {
             failed++;
             send("photo_failed", { index: i, error: result.error });
           } else {
-            await saveGeneratedImage(result.imageData, result.id);
+            // Return generated image as base64 data URL (no filesystem dependency)
+            const b64 = result.imageData.toString("base64");
+            const dataUrl = `data:image/png;base64,${b64}`;
             successful++;
             send("photo_completed", {
               index: i,
               imageId: result.id,
-              previewUrl: getImageUrl(result.id),
+              previewUrl: dataUrl,
             });
           }
         }

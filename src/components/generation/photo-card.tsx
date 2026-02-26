@@ -51,13 +51,11 @@ export function PhotoCard({ result, index }: PhotoCardProps) {
         <div className="absolute inset-0 flex items-end justify-end bg-gradient-to-t from-black/40 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
           <Button
             variant="secondary"
-            size="icon-xs"
+            size="sm"
+            className="size-7"
             asChild
           >
-            <a
-              href={`/api/images/${result.imageId}?download=true`}
-              download
-            >
+            <a href={result.previewUrl} download={`ai-daipai-${index + 1}.png`}>
               <Download className="size-3" />
             </a>
           </Button>

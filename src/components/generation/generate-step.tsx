@@ -14,18 +14,18 @@ export function GenerateStep() {
   const { startGeneration, error } = useGeneration();
 
   const handleGenerate = () => {
-    const referenceImageIds = Object.values(store.referenceImages)
+    const referenceImages = Object.values(store.referenceImages)
       .filter((img): img is NonNullable<typeof img> => !!img)
-      .map((img) => img.id);
+      .map((img) => img.base64);
 
     const config: GenerationConfig = {
-      referenceImageIds,
+      referenceImages,
       sceneType: store.scene?.type ?? "preset",
       scenePresetId:
         store.scene?.type === "preset" ? store.scene.presetId : undefined,
-      sceneImageIds:
+      sceneImages:
         store.scene?.type === "custom"
-          ? store.scene.images.map((img) => img.id)
+          ? store.scene.images.map((img) => img.base64)
           : undefined,
       sceneDescription:
         store.scene?.type === "custom" ? store.scene.description : undefined,
