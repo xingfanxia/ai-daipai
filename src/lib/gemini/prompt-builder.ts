@@ -3,7 +3,7 @@ import { getStylePreset } from "@/lib/presets/styles";
 export interface PromptOptions {
   sceneDescription: string;
   hasCustomSceneImages: boolean;
-  hasInspirationImages: boolean;
+  inspirationStyleDescription?: string;
   pose: string;
   style: string;
   outfit: string | null;
@@ -13,46 +13,36 @@ export interface PromptOptions {
 
 /**
  * Build the generation prompt.
- * Ported verbatim from openclaw extensions/photoshoot/index.ts buildPrompt().
+ * Inspiration images are pre-analyzed into text descriptions (two-step flow)
+ * to prevent face bleed and watermark copying.
  */
 export function buildPrompt(opts: PromptOptions): string {
-  // Face preservation preamble — exact wording from extension
   const face = [
-    `These ${opts.refCount} reference photo(s) show the person — preserve their exact facial features,`,
+    `IMAGE ORDER: The first ${opts.refCount} image(s) after this text are PERSON REFERENCE photos.`,
+    "",
+    `These ${opts.refCount} person reference photo(s) show the ONLY person to generate — preserve their exact facial features,`,
     "eyes, nose, lips, face shape, skin tone, and hair.",
     "Skin quality should look well-maintained and clear from consistent skincare: natural texture is fine,",
     "but avoid obvious acne clusters, inflamed red breakouts, or prominent irritation patches on the face.",
     "",
     "BODY: match the person's body type, build, and proportions as visible in the reference photos.",
     "Do NOT idealize, exaggerate, or change their body shape. Keep it realistic to the reference.",
-    "",
-    "IDENTITY LOCK: this is always the same person from the reference photos.",
-    "Do not drift identity, age, ethnicity, body type, or core proportions between generations.",
   ];
 
-  // Inspiration reference (抄作业)
+  // Inspiration style description (抄作业 — analyzed as text, image NOT passed)
   const inspirationLines: string[] = [];
-  if (opts.hasInspirationImages) {
+  if (opts.inspirationStyleDescription) {
     inspirationLines.push(
-      "STYLE REFERENCE (灵感图/抄作业):",
-      "The inspiration photo(s) show the TARGET LOOK you must recreate.",
-      "Match these elements from the inspiration:",
-      "- Composition & framing (camera angle, distance, crop style)",
-      "- Lighting direction, quality, and mood",
-      "- Color grading & filter style (warm/cool, contrast, saturation)",
-      "- Pose style and body language (similar energy, not exact copy)",
-      "- Overall atmosphere and aesthetic vibe",
-      "- Clothing style (similar category/vibe unless outfit is specified separately)",
-      "",
-      "DO NOT copy the face/identity from the inspiration photo.",
-      "The person must be from the reference photos ONLY.",
-      "The inspiration photo is ONLY for style, composition, and mood reference.",
+      "STYLE RECREATION (analyzed from inspiration reference):",
+      opts.inspirationStyleDescription,
     );
   }
 
-  // Style notes from preset (skip if inspiration images provide the style)
+  // Style notes from preset (skip if inspiration description provides the style)
   const stylePreset = getStylePreset(opts.style);
-  const styleLines = opts.hasInspirationImages ? [] : (stylePreset?.promptLines ?? []);
+  const styleLines = opts.inspirationStyleDescription
+    ? []
+    : (stylePreset?.promptLines ?? []);
 
   // Scene section
   const sceneLines: string[] = [];
@@ -69,7 +59,7 @@ export function buildPrompt(opts: PromptOptions): string {
     sceneLines.push(`Location/scene: ${opts.sceneDescription}`);
   }
 
-  // Outfit and mood — match extension format
+  // Outfit and mood
   const outfitLine = opts.outfit
     ? `Outfit: ${opts.outfit}`
     : "Outfit: stylish, flattering, appropriate for the location and style.";
@@ -90,6 +80,12 @@ export function buildPrompt(opts: PromptOptions): string {
     "",
     "IMPORTANT: Generate ONE photorealistic image of this person in this exact scene.",
     "The photo should look like a real photograph, not AI art.",
-    "Preserve the person's identity perfectly from the reference images.",
+    "Do NOT include any watermarks, logos, text overlays, or social media handles in the generated image.",
+    "",
+    "IDENTITY LOCK (HIGHEST PRIORITY):",
+    `The generated face MUST match the first ${opts.refCount} reference photo(s) EXACTLY.`,
+    "Same eyes, same nose, same lips, same face shape, same skin tone.",
+    "Do NOT blend, average, or mix facial features from ANY other source.",
+    "If there is ANY conflict between style and identity, ALWAYS prioritize identity.",
   ].join("\n");
 }

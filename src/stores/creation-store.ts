@@ -13,7 +13,7 @@ interface CreationState {
 
   // Step 2: Customize
   scene: SceneSelection | null;
-  inspirationImages: UploadedImage[];
+  inspirationImage: UploadedImage | null;
   style: PhotoStyle;
   outfit: string | null;
   mood: string | null;
@@ -30,9 +30,7 @@ interface CreationState {
   addReferenceImage: (slot: UploadSlot, image: UploadedImage) => void;
   removeReferenceImage: (slot: UploadSlot) => void;
   setScene: (scene: SceneSelection) => void;
-  addInspirationImage: (image: UploadedImage) => void;
-  removeInspirationImage: (id: string) => void;
-  clearInspirationImages: () => void;
+  setInspirationImage: (image: UploadedImage | null) => void;
   setStyle: (style: PhotoStyle) => void;
   setOutfit: (outfit: string | null) => void;
   setMood: (mood: string | null) => void;
@@ -49,7 +47,7 @@ const initialState = {
   currentStep: 1 as const,
   referenceImages: {},
   scene: null,
-  inspirationImages: [] as UploadedImage[],
+  inspirationImage: null as UploadedImage | null,
   style: "influencer" as PhotoStyle,
   outfit: null,
   mood: null,
@@ -76,13 +74,7 @@ export const useCreationStore = create<CreationState>((set) => ({
 
   setScene: (scene) => set({ scene }),
 
-  addInspirationImage: (image) => set((state) => ({
-    inspirationImages: [...state.inspirationImages, image].slice(0, 3),
-  })),
-  removeInspirationImage: (id) => set((state) => ({
-    inspirationImages: state.inspirationImages.filter((img) => img.id !== id),
-  })),
-  clearInspirationImages: () => set({ inspirationImages: [] }),
+  setInspirationImage: (image) => set({ inspirationImage: image }),
 
   setStyle: (style) => set({ style }),
   setOutfit: (outfit) => set({ outfit }),

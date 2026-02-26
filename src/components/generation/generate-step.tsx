@@ -27,10 +27,7 @@ export function GenerateStep() {
         store.scene?.type === "custom"
           ? store.scene.images.map((img) => img.base64)
           : undefined,
-      inspirationImages:
-        store.inspirationImages.length > 0
-          ? store.inspirationImages.map((img) => img.base64)
-          : undefined,
+      inspirationImage: store.inspirationImage?.base64,
       sceneDescription:
         store.scene?.type === "custom" ? store.scene.description : undefined,
       style: store.style,

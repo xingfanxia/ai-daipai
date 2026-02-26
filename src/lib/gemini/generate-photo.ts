@@ -11,17 +11,13 @@ export async function generateSinglePhoto(opts: {
   apiKey: string;
   prompt: string;
   refImages: RefImage[];
-  inspirationImages?: RefImage[];
   sceneImages?: RefImage[];
   index: number;
 }): Promise<{ imageData: Buffer; id: string } | { error: string }> {
-  // Order: prompt → person refs → inspiration refs → scene refs
+  // Order: prompt → person refs → scene refs (NO inspiration images)
   const parts = [
     { text: opts.prompt },
     ...opts.refImages.map((img) => ({
-      inlineData: { mimeType: img.mimeType, data: img.data },
-    })),
-    ...(opts.inspirationImages ?? []).map((img) => ({
       inlineData: { mimeType: img.mimeType, data: img.data },
     })),
     ...(opts.sceneImages ?? []).map((img) => ({

@@ -20,7 +20,7 @@ export const photoStyleSchema = z.enum([
 export const generateRequestSchema = z.object({
   referenceImages: z.array(z.string()).min(1).max(5),
   sceneImages: z.array(z.string()).max(3).optional(),
-  inspirationImages: z.array(z.string()).max(3).optional(),
+  inspirationImage: z.string().optional(),
   sceneType: z.enum(["preset", "custom"]),
   scenePresetId: z.string().optional(),
   sceneDescription: z.string().max(500).optional(),

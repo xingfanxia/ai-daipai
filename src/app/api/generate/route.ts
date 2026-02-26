@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import crypto from "node:crypto";
 import { generateSinglePhoto } from "@/lib/gemini/generate-photo";
+import { analyzeInspirationImage } from "@/lib/gemini/client";
 import { buildPrompt } from "@/lib/gemini/prompt-builder";
 import { selectPoses } from "@/lib/presets/poses";
 import { getScenePreset } from "@/lib/presets/scenes";
@@ -40,11 +41,15 @@ export async function POST(request: NextRequest) {
       data: b64,
     }));
 
-    // Inspiration images (抄作业)
-    const inspirationImages = (parsed.inspirationImages ?? []).map((b64) => ({
-      mimeType: "image/jpeg",
-      data: b64,
-    }));
+    // Two-step inspiration flow: analyze image → text description
+    // Inspiration image is NOT passed to generation API
+    let inspirationStyleDescription: string | undefined;
+    if (parsed.inspirationImage) {
+      inspirationStyleDescription = await analyzeInspirationImage(
+        parsed.inspirationImage,
+        apiKey,
+      );
+    }
 
     // Resolve scene description
     let sceneDescription = "";
@@ -80,7 +85,7 @@ export async function POST(request: NextRequest) {
           const prompt = buildPrompt({
             sceneDescription,
             hasCustomSceneImages: sceneImages.length > 0,
-            hasInspirationImages: inspirationImages.length > 0,
+            inspirationStyleDescription,
             pose,
             style: parsed.style,
             outfit: outfitText,
@@ -92,7 +97,6 @@ export async function POST(request: NextRequest) {
             apiKey,
             prompt,
             refImages,
-            inspirationImages: inspirationImages.length > 0 ? inspirationImages : undefined,
             sceneImages: sceneImages.length > 0 ? sceneImages : undefined,
             index: i,
           }).then((result) => ({ index: i, result }));
