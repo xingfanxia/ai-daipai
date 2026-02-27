@@ -18,10 +18,12 @@ export function WizardShell() {
 
   const hasHeadshot = !!referenceImages.headshot;
   const hasScene = !!scene;
+  const hasInspiration = !!useCreationStore((s) => s.inspirationImage);
 
+  // Step 2: can proceed if scene is set OR inspiration image covers scene/style
   const canProceed =
     (currentStep === 1 && hasHeadshot) ||
-    (currentStep === 2 && hasScene);
+    (currentStep === 2 && (hasScene || hasInspiration));
 
   const handleBack = () => {
     if (currentStep > 1) {
@@ -61,19 +63,19 @@ export function WizardShell() {
           disabled={currentStep === 1 || generationStatus === "generating"}
         >
           <ChevronLeft className="size-4" />
-          Back
+          返回
         </Button>
 
         {currentStep < 3 ? (
           <Button onClick={handleNext} disabled={!canProceed}>
             {currentStep === 2 ? (
               <>
-                Generate
+                开始生成
                 <Sparkles className="size-4" />
               </>
             ) : (
               <>
-                Next
+                下一步
                 <ChevronRight className="size-4" />
               </>
             )}

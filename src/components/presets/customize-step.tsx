@@ -16,17 +16,17 @@ export function CustomizeStep() {
       <div className="text-center">
         <h2 className="text-xl font-semibold">自定义风格</h2>
         <p className="text-sm text-muted-foreground">
-          Choose a quick preset or fully customize your photoshoot
+          选择预设套餐或自定义你的写真风格
         </p>
       </div>
 
       <Tabs defaultValue="quick">
         <TabsList className="w-full">
           <TabsTrigger value="quick" className="flex-1">
-            快速开始 Quick Start
+            快速开始
           </TabsTrigger>
           <TabsTrigger value="custom" className="flex-1">
-            自定义 Custom
+            自定义
           </TabsTrigger>
         </TabsList>
 
@@ -39,7 +39,7 @@ export function CustomizeStep() {
             {/* Inspiration — 抄作业 */}
             <section>
               <h3 className="mb-3 text-base font-semibold">
-                💡 灵感图 Inspiration
+                💡 灵感图（抄作业）
               </h3>
               <InspirationPicker />
             </section>
@@ -49,7 +49,7 @@ export function CustomizeStep() {
             {/* Scene */}
             <section>
               <h3 className="mb-3 text-base font-semibold">
-                场景 Scene
+                场景
               </h3>
               <ScenePicker />
             </section>
@@ -59,7 +59,7 @@ export function CustomizeStep() {
             {/* Style */}
             <section>
               <h3 className="mb-3 text-base font-semibold">
-                风格 Style
+                风格
               </h3>
               <StylePicker />
             </section>
@@ -69,7 +69,7 @@ export function CustomizeStep() {
             {/* Outfit */}
             <section>
               <h3 className="mb-3 text-base font-semibold">
-                服装 Outfit
+                服装
               </h3>
               <OutfitPicker />
             </section>
@@ -79,7 +79,7 @@ export function CustomizeStep() {
             {/* Mood */}
             <section>
               <h3 className="mb-3 text-base font-semibold">
-                情绪 Mood
+                情绪
               </h3>
               <MoodPicker />
             </section>
@@ -89,7 +89,7 @@ export function CustomizeStep() {
             {/* Photo count */}
             <section>
               <h3 className="mb-3 text-base font-semibold">
-                数量 Photo Count
+                生成数量
               </h3>
               <PhotoCountSlider />
             </section>
