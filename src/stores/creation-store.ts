@@ -80,7 +80,10 @@ export const useCreationStore = create<CreationState>((set) => ({
 
   setScene: (scene) => set({ scene }),
 
-  setInspirationImage: (image) => set({ inspirationImage: image }),
+  setInspirationImage: (image) => set(image
+    ? { inspirationImage: image, scene: null, outfit: null, mood: null } // mutually exclusive with manual settings
+    : { inspirationImage: null },
+  ),
 
   setStyle: (style) => set({ style }),
   setOutfit: (outfit) => set({ outfit }),
@@ -94,6 +97,7 @@ export const useCreationStore = create<CreationState>((set) => ({
     style: styleId,
     outfit: outfitId,
     mood: moodId,
+    inspirationImage: null, // mutually exclusive with inspiration mode
   }),
 
   startGeneration: (sessionId) => set({
