@@ -44,6 +44,10 @@ export function buildPrompt(opts: PromptOptions): string {
     ? []
     : (stylePreset?.promptLines ?? []);
 
+  // When inspiration is provided, scene/outfit/mood are already in the analyzed
+  // style description — only include manual overrides if explicitly set by user
+  const hasInspiration = !!opts.inspirationStyleDescription;
+
   // Scene section
   const sceneLines: string[] = [];
   if (opts.hasCustomSceneImages) {
@@ -55,18 +59,24 @@ export function buildPrompt(opts: PromptOptions): string {
     if (opts.sceneDescription) {
       sceneLines.push(`Additional scene context: ${opts.sceneDescription}`);
     }
-  } else {
+  } else if (opts.sceneDescription) {
     sceneLines.push(`Location/scene: ${opts.sceneDescription}`);
+  } else if (hasInspiration) {
+    sceneLines.push("Scene: Recreate the scene/environment described in the style analysis above.");
   }
 
-  // Outfit and mood
+  // Outfit and mood — defer to inspiration analysis when available
   const outfitLine = opts.outfit
     ? `Outfit: ${opts.outfit}`
-    : "Outfit: stylish, flattering, appropriate for the location and style.";
+    : hasInspiration
+      ? "Outfit: Match the outfit style described in the style analysis above."
+      : "Outfit: stylish, flattering, appropriate for the location and style.";
 
   const moodLine = opts.mood
     ? `Mood/vibe: ${opts.mood}`
-    : "Mood/vibe: confident, natural, photogenic.";
+    : hasInspiration
+      ? "Mood/vibe: Match the mood and atmosphere from the style analysis above."
+      : "Mood/vibe: confident, natural, photogenic.";
 
   return [
     ...face,
