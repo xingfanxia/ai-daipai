@@ -7,7 +7,7 @@ import { GenerationProgress } from "./generation-progress";
 import { PhotoGrid } from "./photo-grid";
 import { DownloadBar } from "./download-bar";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, AlertCircle, Loader2 } from "lucide-react";
+import { RotateCcw, AlertCircle, Loader2, Palette } from "lucide-react";
 import type { GenerationConfig } from "@/types/generation";
 
 export function GenerateStep() {
@@ -85,6 +85,12 @@ export function GenerateStep() {
     );
   }
 
+  // Go back to step 2 with reference images preserved
+  const handleChangeStyle = () => {
+    store.setGenerationStatus("idle");
+    store.setStep(2);
+  };
+
   // Completed
   if (store.generationStatus === "completed") {
     return (
@@ -92,11 +98,21 @@ export function GenerateStep() {
         <div className="text-center">
           <h2 className="text-xl font-semibold">生成完成!</h2>
           <p className="text-sm text-muted-foreground">
-            写真已生成完毕，点击下方下载
+            写真已生成完毕，点击照片查看大图
           </p>
         </div>
         <PhotoGrid />
         <DownloadBar />
+        <div className="flex justify-center gap-3">
+          <Button variant="outline" onClick={handleChangeStyle}>
+            <Palette className="size-4" />
+            换个风格再拍
+          </Button>
+          <Button variant="outline" onClick={handleGenerate}>
+            <RotateCcw className="size-4" />
+            同风格重新生成
+          </Button>
+        </div>
       </div>
     );
   }
