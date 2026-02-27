@@ -1,14 +1,15 @@
 /**
  * Client-side image compression using canvas.
- * Resizes to max 1600px and compresses to JPEG to stay under Vercel's 4.5MB body limit.
+ * Only compresses if the file exceeds Vercel's 4.5MB body limit.
+ * Preserves as much quality as possible since the server saves to Blob at full resolution.
  */
 
-const MAX_DIMENSION = 2048;
+const MAX_DIMENSION = 3072;
 const JPEG_QUALITY = 0.92;
-const TARGET_SIZE_BYTES = 3.5 * 1024 * 1024; // 3.5MB target (leaves room for form overhead)
+const TARGET_SIZE_BYTES = 4 * 1024 * 1024; // 4MB target (leaves room for form overhead)
 
 export async function compressImage(file: File): Promise<File> {
-  // Skip if already small enough
+  // Skip compression if already under the limit
   if (file.size <= TARGET_SIZE_BYTES) {
     return file;
   }
@@ -38,7 +39,7 @@ export async function compressImage(file: File): Promise<File> {
 
   do {
     blob = await canvas.convertToBlob({ type: "image/jpeg", quality });
-    if (blob.size <= TARGET_SIZE_BYTES || quality <= 0.4) break;
+    if (blob.size <= TARGET_SIZE_BYTES || quality <= 0.5) break;
     quality -= 0.1;
   } while (blob.size > TARGET_SIZE_BYTES);
 

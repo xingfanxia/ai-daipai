@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import archiver from "archiver";
 import { Readable } from "node:stream";
-import { getImageBuffer } from "@/lib/images/storage";
+import { fetchImageBuffer } from "@/lib/images/storage";
 
 export async function GET(request: NextRequest) {
   const ids = request.nextUrl.searchParams.get("ids");
@@ -12,9 +12,10 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const imageIds = ids.split(",").filter(Boolean);
-  if (imageIds.length === 0) {
-    return new Response(JSON.stringify({ error: "No valid image IDs" }), {
+  // IDs are now blob URLs
+  const blobUrls = ids.split(",").filter(Boolean);
+  if (blobUrls.length === 0) {
+    return new Response(JSON.stringify({ error: "No valid image URLs" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
@@ -25,13 +26,13 @@ export async function GET(request: NextRequest) {
 
   // Add images to archive
   let added = 0;
-  for (const id of imageIds) {
-    const buffer = await getImageBuffer(id);
-    if (buffer) {
-      const ext = id.includes("gen-") ? "png" : "jpg";
+  for (const url of blobUrls) {
+    try {
+      const buffer = await fetchImageBuffer(url);
+      const ext = url.includes(".png") ? "png" : "jpg";
       archive.append(buffer, { name: `photo-${added + 1}.${ext}` });
       added++;
-    }
+    } catch { /* skip failed fetches */ }
   }
 
   if (added === 0) {

@@ -1,11 +1,11 @@
 export type GenerationStatus = "idle" | "generating" | "completed" | "error";
 
 export interface GenerationConfig {
-  /** base64-encoded JPEG image data for reference photos */
+  /** Blob URLs for reference photos (fetched server-side) */
   referenceImages: string[];
-  /** base64-encoded JPEG image data for custom scene photos */
+  /** Blob URLs for custom scene photos */
   sceneImages?: string[];
-  /** base64-encoded JPEG image data for ONE inspiration/style reference photo (抄作业) */
+  /** Blob URL for ONE inspiration/style reference photo (抄作业) */
   inspirationImage?: string;
   sceneType: "preset" | "custom";
   scenePresetId?: string;

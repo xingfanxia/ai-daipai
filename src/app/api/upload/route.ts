@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { preprocessImage } from "@/lib/images/preprocessing";
-import { saveImage, getImageUrl } from "@/lib/images/storage";
+import { preprocessImage, generateThumbnail } from "@/lib/images/preprocessing";
+import { saveImage } from "@/lib/images/storage";
 
-// Vercel serverless body size limit (App Router)
 export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
@@ -35,19 +34,22 @@ export async function POST(request: NextRequest) {
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const processed = await preprocessImage(buffer);
-    const id = await saveImage(processed.buffer, slot);
 
-    // Return base64 directly (serverless instances don't share /tmp)
-    const base64 = processed.buffer.toString("base64");
-    const dataUrl = `data:${processed.mimeType};base64,${base64}`;
+    // Preprocess: EXIF rotate + JPEG convert (preserves resolution)
+    const processed = await preprocessImage(buffer);
+
+    // Save full-res image to Vercel Blob
+    const { id, blobUrl } = await saveImage(processed.buffer, slot);
+
+    // Generate small thumbnail for instant UI preview
+    const previewUrl = await generateThumbnail(buffer);
 
     return NextResponse.json({
       image: {
         id,
         slot,
-        previewUrl: dataUrl,
-        base64,
+        blobUrl,
+        previewUrl,
         width: processed.width,
         height: processed.height,
         sizeKB: processed.sizeKB,

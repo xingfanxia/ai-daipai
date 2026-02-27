@@ -1,48 +1,59 @@
 import crypto from "node:crypto";
-import fs from "node:fs/promises";
-import path from "node:path";
-import os from "node:os";
+import { put, del } from "@vercel/blob";
 
-// Vercel serverless: only /tmp is writable
-const STORAGE_DIR = path.join(os.tmpdir(), "ai-daipai-images");
-
-export async function ensureStorageDir(): Promise<void> {
-  await fs.mkdir(STORAGE_DIR, { recursive: true });
-}
-
+/**
+ * Save an image to Vercel Blob Storage.
+ * Returns the blob URL (publicly accessible via Vercel CDN).
+ */
 export async function saveImage(
   buffer: Buffer,
   prefix: string = "img",
-): Promise<string> {
-  await ensureStorageDir();
+): Promise<{ id: string; blobUrl: string }> {
   const id = `${prefix}-${crypto.randomBytes(8).toString("hex")}`;
-  const filePath = path.join(STORAGE_DIR, `${id}.jpg`);
-  await fs.writeFile(filePath, buffer);
-  return id;
+  const pathname = `uploads/${id}.jpg`;
+
+  const blob = await put(pathname, buffer, {
+    access: "public",
+    contentType: "image/jpeg",
+    addRandomSuffix: false,
+  });
+
+  return { id, blobUrl: blob.url };
 }
 
+/**
+ * Save a generated image to Vercel Blob Storage.
+ */
 export async function saveGeneratedImage(
   buffer: Buffer,
   id: string,
 ): Promise<string> {
-  await ensureStorageDir();
-  const filePath = path.join(STORAGE_DIR, `${id}.png`);
-  await fs.writeFile(filePath, buffer);
-  return id;
+  const pathname = `generated/${id}.png`;
+
+  const blob = await put(pathname, buffer, {
+    access: "public",
+    contentType: "image/png",
+    addRandomSuffix: false,
+  });
+
+  return blob.url;
 }
 
-export async function getImageBuffer(id: string): Promise<Buffer | null> {
-  for (const ext of [".jpg", ".png"]) {
-    const filePath = path.join(STORAGE_DIR, `${id}${ext}`);
-    try {
-      return await fs.readFile(filePath);
-    } catch {
-      /* not found */
-    }
+/**
+ * Fetch image buffer from a blob URL.
+ */
+export async function fetchImageBuffer(url: string): Promise<Buffer> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image from blob: ${response.status}`);
   }
-  return null;
+  const arrayBuffer = await response.arrayBuffer();
+  return Buffer.from(arrayBuffer);
 }
 
-export function getImageUrl(id: string): string {
-  return `/api/images/${id}`;
+/**
+ * Delete an image from Vercel Blob Storage.
+ */
+export async function deleteImage(blobUrl: string): Promise<void> {
+  await del(blobUrl);
 }

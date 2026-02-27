@@ -38,7 +38,7 @@ export function useUpload() {
         const data = await response.json();
         const image = data.image as UploadedImage;
 
-        if (slot !== "scene") {
+        if (slot !== "scene" && slot !== "inspiration") {
           addReferenceImage(slot, image);
         }
 

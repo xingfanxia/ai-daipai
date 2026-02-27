@@ -19,7 +19,7 @@ export function GenerateStep() {
     const refEntries = Object.entries(store.referenceImages)
       .filter((entry): entry is [string, NonNullable<(typeof entry)[1]>] => !!entry[1]);
 
-    const referenceImages = refEntries.map(([, img]) => img.base64);
+    const referenceImages = refEntries.map(([, img]) => img.blobUrl);
     const refSlots = refEntries.map(([slot]) => slot);
 
     const config: GenerationConfig = {
@@ -30,9 +30,9 @@ export function GenerateStep() {
         store.scene?.type === "preset" ? store.scene.presetId : undefined,
       sceneImages:
         store.scene?.type === "custom"
-          ? store.scene.images.map((img) => img.base64)
+          ? store.scene.images.map((img) => img.blobUrl)
           : undefined,
-      inspirationImage: store.inspirationImage?.base64,
+      inspirationImage: store.inspirationImage?.blobUrl,
       sceneDescription:
         store.scene?.type === "custom" ? store.scene.description : undefined,
       style: store.style,

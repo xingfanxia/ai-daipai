@@ -8,12 +8,21 @@ import { getScenePreset } from "@/lib/presets/scenes";
 import { getOutfitPreset } from "@/lib/presets/outfits";
 import { getMoodOption } from "@/lib/presets/moods";
 import { generateRequestSchema } from "@/lib/schemas";
+import { fetchImageBuffer } from "@/lib/images/storage";
 
 // 8 photos × ~60s each = ~8 min max
 export const maxDuration = 600;
 
 function sseEvent(event: string, data: unknown): string {
   return `data: ${JSON.stringify({ event, data })}\n\n`;
+}
+
+/**
+ * Fetch an image from blob URL and convert to base64 for Gemini API.
+ */
+async function blobToBase64(blobUrl: string): Promise<{ mimeType: string; data: string }> {
+  const buffer = await fetchImageBuffer(blobUrl);
+  return { mimeType: "image/jpeg", data: buffer.toString("base64") };
 }
 
 export async function POST(request: NextRequest) {
@@ -29,24 +38,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Reference images arrive as base64 strings from the client
-    const refImages = parsed.referenceImages.map((b64) => ({
-      mimeType: "image/jpeg",
-      data: b64,
-    }));
+    // Fetch reference images from blob storage (full resolution)
+    const refImages = await Promise.all(
+      parsed.referenceImages.map((url) => blobToBase64(url)),
+    );
 
-    // Scene images for custom scenes
-    const sceneImages = (parsed.sceneImages ?? []).map((b64) => ({
-      mimeType: "image/jpeg",
-      data: b64,
-    }));
+    // Fetch scene images from blob storage
+    const sceneImages = await Promise.all(
+      (parsed.sceneImages ?? []).map((url) => blobToBase64(url)),
+    );
 
     // Two-step inspiration flow: analyze image → text description
     // Inspiration image is NOT passed to generation API
     let inspirationStyleDescription: string | undefined;
     if (parsed.inspirationImage) {
+      const inspirationB64 = await blobToBase64(parsed.inspirationImage);
       inspirationStyleDescription = await analyzeInspirationImage(
-        parsed.inspirationImage,
+        inspirationB64.data,
         apiKey,
       );
     }

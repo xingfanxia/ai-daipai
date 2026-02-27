@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getImageBuffer } from "@/lib/images/storage";
 
 export async function GET(
   _request: NextRequest,
@@ -7,18 +6,7 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  const buffer = await getImageBuffer(id);
-  if (!buffer) {
-    return NextResponse.json({ error: "Image not found" }, { status: 404 });
-  }
-
-  // Determine content type from the id prefix or default
-  const contentType = id.startsWith("gen-") ? "image/png" : "image/jpeg";
-
-  return new Response(new Uint8Array(buffer), {
-    headers: {
-      "Content-Type": contentType,
-      "Cache-Control": "public, max-age=86400, immutable",
-    },
-  });
+  // This route is kept for backwards compatibility but images are now served
+  // directly from Vercel Blob URLs. If an ID-based request comes in, return 404.
+  return NextResponse.json({ error: "Use blob URLs directly" }, { status: 404 });
 }

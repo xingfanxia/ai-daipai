@@ -3,9 +3,10 @@ export type UploadSlot = "headshot" | "headshot2" | "headshot3" | "halfbody" | "
 export interface UploadedImage {
   id: string;
   slot: UploadSlot;
+  /** Blob storage URL for the full-resolution image */
+  blobUrl: string;
+  /** Small preview URL for UI thumbnails */
   previewUrl: string;
-  /** base64-encoded image data (JPEG) for sending to generation API */
-  base64: string;
   width: number;
   height: number;
   sizeKB: number;
