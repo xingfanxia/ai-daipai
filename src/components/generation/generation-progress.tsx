@@ -15,8 +15,7 @@ export function GenerationProgress() {
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">
-          Generating photo {Math.min(currentPhotoIndex + 1, photoCount)} of{" "}
-          {photoCount}...
+          正在生成第 {Math.min(currentPhotoIndex + 1, photoCount)}/{photoCount} 张...
         </span>
         <span className="font-medium tabular-nums">
           {completedCount}/{photoCount}

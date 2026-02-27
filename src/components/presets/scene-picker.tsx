@@ -105,7 +105,7 @@ export function ScenePicker() {
           className="cursor-pointer"
           onClick={() => setActiveCategory("all")}
         >
-          All
+          全部
         </Badge>
         {SCENE_CATEGORIES.map((cat) => (
           <Badge
@@ -138,7 +138,7 @@ export function ScenePicker() {
             <Camera className="size-8 text-muted-foreground" />
             <div className="text-center">
               <p className="text-sm font-medium">上传场景</p>
-              <p className="text-[10px] text-muted-foreground">Upload Scene</p>
+              <p className="text-[10px] text-muted-foreground">自定义场景</p>
             </div>
           </CardContent>
         </Card>
@@ -189,7 +189,7 @@ export function ScenePicker() {
         <div className="rounded-xl border bg-muted/30 p-4">
           <div className="flex flex-col gap-4">
             <p className="text-sm font-medium">
-              Upload your own scene photos (max 2)
+              上传自定义场景照片（最多 2 张）
             </p>
 
             <div className="flex gap-3">
@@ -201,7 +201,7 @@ export function ScenePicker() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={img.previewUrl}
-                    alt={`Scene ${i + 1}`}
+                    alt={`场景 ${i + 1}`}
                     className="size-full object-cover"
                   />
                   <Button
@@ -219,7 +219,7 @@ export function ScenePicker() {
                 <label className="flex size-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-muted-foreground/25 transition-colors hover:border-primary/50">
                   <Upload className="size-5 text-muted-foreground" />
                   <span className="text-[10px] text-muted-foreground">
-                    {isUploading ? "Uploading..." : "Add photo"}
+                    {isUploading ? "上传中..." : "添加照片"}
                   </span>
                   <input
                     type="file"
@@ -241,14 +241,14 @@ export function ScenePicker() {
                 htmlFor="scene-description"
                 className="mb-1.5 block text-sm text-muted-foreground"
               >
-                描述场景 Describe the scene (optional)
+                场景描述（可选）
               </label>
               <input
                 id="scene-description"
                 type="text"
                 value={customDescription}
                 onChange={(e) => handleDescriptionChange(e.target.value)}
-                placeholder="e.g. A sunny beach with palm trees..."
+                placeholder="例如：阳光明媚的海滩、棕榈树..."
                 className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
               />
             </div>

@@ -1,17 +1,19 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useCreationStore } from "@/stores/creation-store";
 import { useGeneration } from "@/hooks/use-generation";
 import { GenerationProgress } from "./generation-progress";
 import { PhotoGrid } from "./photo-grid";
 import { DownloadBar } from "./download-bar";
 import { Button } from "@/components/ui/button";
-import { Sparkles, RotateCcw, AlertCircle } from "lucide-react";
+import { RotateCcw, AlertCircle, Loader2 } from "lucide-react";
 import type { GenerationConfig } from "@/types/generation";
 
 export function GenerateStep() {
   const store = useCreationStore();
   const { startGeneration, error } = useGeneration();
+  const autoStarted = useRef(false);
 
   const handleGenerate = () => {
     const refEntries = Object.entries(store.referenceImages)
@@ -42,20 +44,25 @@ export function GenerateStep() {
     startGeneration(config);
   };
 
-  // Idle — just arrived at step 3
+  // Auto-start generation when entering step 3
+  useEffect(() => {
+    if (store.generationStatus === "idle" && !autoStarted.current) {
+      autoStarted.current = true;
+      handleGenerate();
+    }
+  }); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Idle / starting — show loading immediately
   if (store.generationStatus === "idle") {
     return (
       <div className="flex flex-col items-center gap-6 py-12">
+        <Loader2 className="size-10 animate-spin text-primary" />
         <div className="text-center">
-          <h2 className="text-xl font-semibold">Ready to Generate</h2>
+          <h2 className="text-xl font-semibold">准备生成中...</h2>
           <p className="text-sm text-muted-foreground">
-            {store.photoCount} photos will be generated with your settings
+            正在初始化，请稍候
           </p>
         </div>
-        <Button size="lg" onClick={handleGenerate} className="h-12 px-8">
-          <Sparkles className="size-5" />
-          Generate Photos
-        </Button>
       </div>
     );
   }
@@ -67,7 +74,7 @@ export function GenerateStep() {
         <div className="text-center">
           <h2 className="text-xl font-semibold">生成中...</h2>
           <p className="text-sm text-muted-foreground">
-            AI is creating your photos. This may take a moment.
+            AI 正在创作你的写真，请耐心等待
           </p>
         </div>
         <GenerationProgress />
@@ -83,7 +90,7 @@ export function GenerateStep() {
         <div className="text-center">
           <h2 className="text-xl font-semibold">生成完成!</h2>
           <p className="text-sm text-muted-foreground">
-            Your photos are ready. Download them below.
+            写真已生成完毕，点击下方下载
           </p>
         </div>
         <PhotoGrid />
@@ -97,14 +104,14 @@ export function GenerateStep() {
     <div className="flex flex-col items-center gap-6 py-12">
       <AlertCircle className="size-12 text-destructive" />
       <div className="text-center">
-        <h2 className="text-xl font-semibold">Generation Failed</h2>
+        <h2 className="text-xl font-semibold">生成失败</h2>
         <p className="text-sm text-destructive">
-          {error || "Something went wrong. Please try again."}
+          {error || "出了点问题，请重试"}
         </p>
       </div>
       <Button variant="outline" onClick={handleGenerate}>
         <RotateCcw className="size-4" />
-        Retry
+        重试
       </Button>
     </div>
   );

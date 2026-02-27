@@ -5,13 +5,13 @@ import { useCreationStore } from "@/stores/creation-store";
 import { compressImage } from "@/lib/images/compress-client";
 
 export function useUpload() {
-  const [isUploading, setIsUploading] = useState(false);
+  const [uploadingSlot, setUploadingSlot] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const addReferenceImage = useCreationStore((s) => s.addReferenceImage);
 
   const uploadFile = useCallback(
     async (file: File, slot: UploadSlot): Promise<UploadedImage | null> => {
-      setIsUploading(true);
+      setUploadingSlot(slot);
       setError(null);
 
       try {
@@ -48,11 +48,11 @@ export function useUpload() {
         setError(msg);
         return null;
       } finally {
-        setIsUploading(false);
+        setUploadingSlot(null);
       }
     },
     [addReferenceImage],
   );
 
-  return { uploadFile, isUploading, error, clearError: () => setError(null) };
+  return { uploadFile, uploadingSlot, isUploading: uploadingSlot !== null, error, clearError: () => setError(null) };
 }

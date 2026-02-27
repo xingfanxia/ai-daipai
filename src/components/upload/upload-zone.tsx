@@ -134,7 +134,7 @@ export function UploadZone({
             <p className="text-xs text-muted-foreground">{sublabel}</p>
           </div>
           <p className="text-[10px] text-muted-foreground">
-            Drag & drop or click
+            拖拽或点击上传
           </p>
         </>
       )}

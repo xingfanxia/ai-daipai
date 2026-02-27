@@ -37,11 +37,11 @@ export function DownloadBar() {
   return (
     <div className="flex items-center justify-between rounded-xl border bg-muted/30 px-4 py-3">
       <p className="text-sm text-muted-foreground">
-        {successCount} photo{successCount !== 1 ? "s" : ""} ready
+        {successCount} 张写真已就绪
       </p>
       <Button size="sm" onClick={handleDownloadAll}>
         <Download className="size-4" />
-        Download All
+        全部下载
       </Button>
     </div>
   );

@@ -49,7 +49,7 @@ const bodySlots: SlotDef[] = [
 ];
 
 export function UploadStep() {
-  const { uploadFile, isUploading } = useUpload();
+  const { uploadFile, uploadingSlot } = useUpload();
   const referenceImages = useCreationStore((s) => s.referenceImages);
   const removeReferenceImage = useCreationStore((s) => s.removeReferenceImage);
 
@@ -73,7 +73,7 @@ export function UploadStep() {
                 sublabel={sublabel}
                 required={required}
                 image={referenceImages[slot]}
-                isUploading={isUploading}
+                isUploading={uploadingSlot === slot}
                 onUpload={(file) => uploadFile(file, slot)}
                 onRemove={() => removeReferenceImage(slot)}
               />
@@ -90,7 +90,7 @@ export function UploadStep() {
                 sublabel={sublabel}
                 required={required}
                 image={referenceImages[slot]}
-                isUploading={isUploading}
+                isUploading={uploadingSlot === slot}
                 onUpload={(file) => uploadFile(file, slot)}
                 onRemove={() => removeReferenceImage(slot)}
               />

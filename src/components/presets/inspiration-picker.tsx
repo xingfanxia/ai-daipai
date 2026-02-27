@@ -1,15 +1,17 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useCreationStore } from "@/stores/creation-store";
 import { useUpload } from "@/hooks/use-upload";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, Upload, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Lightbulb, Upload, X, Loader2 } from "lucide-react";
 
 export function InspirationPicker() {
   const inspirationImage = useCreationStore((s) => s.inspirationImage);
   const setInspirationImage = useCreationStore((s) => s.setInspirationImage);
   const { uploadFile, isUploading } = useUpload();
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const handleUpload = useCallback(
     async (file: File) => {
@@ -20,6 +22,31 @@ export function InspirationPicker() {
     },
     [uploadFile, setInspirationImage]
   );
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragOver(false);
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith("image/")) {
+        handleUpload(file);
+      }
+    },
+    [handleUpload],
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  }, []);
 
   return (
     <div className="flex flex-col gap-3">
@@ -51,10 +78,25 @@ export function InspirationPicker() {
         )}
 
         {!inspirationImage && (
-          <label className="flex size-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-amber-400/30 transition-colors hover:border-amber-500/60">
-            <Upload className="size-5 text-muted-foreground" />
+          <label
+            className={cn(
+              "flex size-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed transition-colors",
+              isDragOver
+                ? "border-amber-500 bg-amber-50/50 dark:bg-amber-950/20"
+                : "border-amber-400/30 hover:border-amber-500/60",
+            )}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragEnter={handleDragOver}
+            onDragLeave={handleDragLeave}
+          >
+            {isUploading ? (
+              <Loader2 className="size-5 animate-spin text-muted-foreground" />
+            ) : (
+              <Upload className="size-5 text-muted-foreground" />
+            )}
             <span className="text-[10px] text-muted-foreground">
-              {isUploading ? "上传中..." : "添加灵感图"}
+              {isUploading ? "上传中..." : "拖拽或点击"}
             </span>
             <input
               type="file"
