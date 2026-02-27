@@ -21,7 +21,7 @@ export function useGeneration() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...config,
-          model: config.model ?? 'pro',
+          model: config.model ?? 'nb2',
           abTest: config.abTest ?? false,
         }),
         signal: controller.signal,

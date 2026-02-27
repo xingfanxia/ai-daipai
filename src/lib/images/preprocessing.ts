@@ -10,12 +10,12 @@ export interface ProcessedImage {
 
 export async function preprocessImage(input: Buffer): Promise<ProcessedImage> {
   const image = sharp(input).rotate(); // auto-rotate from EXIF
-  const resized = image.resize(1024, 1024, {
+  const resized = image.resize(2048, 2048, {
     fit: "inside",
     withoutEnlargement: true,
   });
   const output = await resized
-    .jpeg({ quality: 85 })
+    .jpeg({ quality: 92 })
     .toBuffer({ resolveWithObject: true });
 
   return {

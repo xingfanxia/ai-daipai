@@ -3,8 +3,8 @@
  * Resizes to max 1600px and compresses to JPEG to stay under Vercel's 4.5MB body limit.
  */
 
-const MAX_DIMENSION = 1600;
-const JPEG_QUALITY = 0.85;
+const MAX_DIMENSION = 2048;
+const JPEG_QUALITY = 0.92;
 const TARGET_SIZE_BYTES = 3.5 * 1024 * 1024; // 3.5MB target (leaves room for form overhead)
 
 export async function compressImage(file: File): Promise<File> {

@@ -39,6 +39,8 @@ export function GenerateStep() {
       outfit: store.outfit,
       mood: store.mood,
       count: store.photoCount,
+      model: store.model,
+      abTest: store.abTest,
     };
 
     startGeneration(config);
