@@ -99,6 +99,7 @@ export async function POST(request: NextRequest) {
               outfit: outfitText,
               mood: moodText,
               refCount: refImages.length,
+              refSlots: parsed.refSlots,
             });
 
             promises.push(

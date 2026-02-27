@@ -2,6 +2,8 @@ import { z } from "zod/v4";
 
 export const uploadSlotSchema = z.enum([
   "headshot",
+  "headshot2",
+  "headshot3",
   "halfbody",
   "fullbody",
   "scene",
@@ -30,6 +32,7 @@ export const generateRequestSchema = z.object({
   count: z.number().int().min(1).max(8),
   model: z.enum(['pro', 'nb2']).default('nb2'),
   abTest: z.boolean().default(false),
+  refSlots: z.array(z.string()).optional(),
 });
 
 export type GenerateRequest = z.infer<typeof generateRequestSchema>;

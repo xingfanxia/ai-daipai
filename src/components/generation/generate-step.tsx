@@ -14,12 +14,15 @@ export function GenerateStep() {
   const { startGeneration, error } = useGeneration();
 
   const handleGenerate = () => {
-    const referenceImages = Object.values(store.referenceImages)
-      .filter((img): img is NonNullable<typeof img> => !!img)
-      .map((img) => img.base64);
+    const refEntries = Object.entries(store.referenceImages)
+      .filter((entry): entry is [string, NonNullable<(typeof entry)[1]>] => !!entry[1]);
+
+    const referenceImages = refEntries.map(([, img]) => img.base64);
+    const refSlots = refEntries.map(([slot]) => slot);
 
     const config: GenerationConfig = {
       referenceImages,
+      refSlots,
       sceneType: store.scene?.type ?? "preset",
       scenePresetId:
         store.scene?.type === "preset" ? store.scene.presetId : undefined,

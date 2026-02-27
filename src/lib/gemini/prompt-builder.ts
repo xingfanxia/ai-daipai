@@ -9,6 +9,8 @@ export interface PromptOptions {
   outfit: string | null;
   mood: string | null;
   refCount: number;
+  /** Ordered list of slot names matching the reference images */
+  refSlots?: string[];
 }
 
 /**
@@ -17,9 +19,32 @@ export interface PromptOptions {
  * to prevent face bleed and watermark copying.
  */
 export function buildPrompt(opts: PromptOptions): string {
-  const face = [
-    `IMAGE ORDER: The first ${opts.refCount} image(s) after this text are PERSON REFERENCE photos.`,
-    "",
+  const face: string[] = [];
+  face.push(`IMAGE ORDER: The first ${opts.refCount} image(s) after this text are PERSON REFERENCE photos.`);
+  face.push("");
+
+  // Annotate each reference image by slot
+  if (opts.refSlots && opts.refSlots.length > 0) {
+    for (let i = 0; i < opts.refSlots.length; i++) {
+      const slot = opts.refSlots[i];
+      const label = slot.startsWith("headshot") ? "FACE CLOSE-UP"
+        : slot === "halfbody" ? "HALF-BODY SHOT"
+        : slot === "fullbody" ? "FULL-BODY SHOT"
+        : "REFERENCE PHOTO";
+      face.push(`Image ${i + 1}: ${label} — ${
+        slot.startsWith("headshot")
+          ? "use for precise facial features, skin tone, and hair"
+          : slot === "halfbody"
+            ? "use for upper body proportions and build"
+            : slot === "fullbody"
+              ? "use for overall body type, height proportions, and full figure"
+              : "general reference"
+      }`);
+    }
+    face.push("");
+  }
+
+  face.push(
     `These ${opts.refCount} person reference photo(s) show the ONLY person to generate — preserve their exact facial features,`,
     "eyes, nose, lips, face shape, skin tone, and hair.",
     "Skin quality should look well-maintained and clear from consistent skincare: natural texture is fine,",
@@ -27,7 +52,7 @@ export function buildPrompt(opts: PromptOptions): string {
     "",
     "BODY: match the person's body type, build, and proportions as visible in the reference photos.",
     "Do NOT idealize, exaggerate, or change their body shape. Keep it realistic to the reference.",
-  ];
+  );
 
   // Inspiration style description (抄作业 — analyzed as text, image NOT passed)
   const inspirationLines: string[] = [];

@@ -14,6 +14,8 @@ export interface GenerationConfig {
   outfit: string | null;
   mood: string | null;
   count: number;
+  /** Ordered list of slot names matching the reference images */
+  refSlots?: string[];
   /** Which generation model to use */
   model?: 'pro' | 'nb2';
   /** When true, each photo is generated with BOTH models for A/B comparison */

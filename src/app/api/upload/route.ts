@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
     if (
       !slot ||
-      !["headshot", "halfbody", "fullbody", "scene", "inspiration"].includes(slot)
+      !["headshot", "headshot2", "headshot3", "halfbody", "fullbody", "scene", "inspiration"].includes(slot)
     ) {
       return NextResponse.json({ error: "Invalid slot" }, { status: 400 });
     }
