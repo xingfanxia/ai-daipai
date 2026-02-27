@@ -78,39 +78,51 @@ export async function POST(request: NextRequest) {
           controller.enqueue(encoder.encode(sseEvent(event, data)));
         };
 
-        send("started", { sessionId, totalPhotos: parsed.count });
+        const modelsToRun: Array<'pro' | 'nb2'> = parsed.abTest
+          ? ['pro', 'nb2']
+          : [parsed.model];
+        const totalPhotos = parsed.count * modelsToRun.length;
+
+        send("started", { sessionId, totalPhotos });
 
         // Fire all generation requests in parallel
-        const promises = poses.map((pose, i) => {
-          const prompt = buildPrompt({
-            sceneDescription,
-            hasCustomSceneImages: sceneImages.length > 0,
-            inspirationStyleDescription,
-            pose,
-            style: parsed.style,
-            outfit: outfitText,
-            mood: moodText,
-            refCount: refImages.length,
-          });
+        const promises: Array<Promise<{ index: number; model: string; result: Awaited<ReturnType<typeof generateSinglePhoto>> }>> = [];
+        for (const modelChoice of modelsToRun) {
+          for (let i = 0; i < poses.length; i++) {
+            const pose = poses[i];
+            const prompt = buildPrompt({
+              sceneDescription,
+              hasCustomSceneImages: sceneImages.length > 0,
+              inspirationStyleDescription,
+              pose,
+              style: parsed.style,
+              outfit: outfitText,
+              mood: moodText,
+              refCount: refImages.length,
+            });
 
-          return generateSinglePhoto({
-            apiKey,
-            prompt,
-            refImages,
-            sceneImages: sceneImages.length > 0 ? sceneImages : undefined,
-            index: i,
-          }).then((result) => ({ index: i, result }));
-        });
+            promises.push(
+              generateSinglePhoto({
+                apiKey,
+                prompt,
+                refImages,
+                sceneImages: sceneImages.length > 0 ? sceneImages : undefined,
+                index: i,
+                model: modelChoice,
+              }).then((result) => ({ index: i, model: modelChoice, result })),
+            );
+          }
+        }
 
         // Stream results as they complete
         let successful = 0;
         let failed = 0;
         const pending = promises.map((p) =>
           p.then((res) => {
-            const { index: i, result } = res;
+            const { index: i, model: modelUsed, result } = res;
             if ("error" in result) {
               failed++;
-              send("photo_failed", { index: i, error: result.error });
+              send("photo_failed", { index: i, error: result.error, model: modelUsed });
             } else {
               const b64 = result.imageData.toString("base64");
               const dataUrl = `data:image/png;base64,${b64}`;
@@ -119,6 +131,7 @@ export async function POST(request: NextRequest) {
                 index: i,
                 imageId: result.id,
                 previewUrl: dataUrl,
+                model: modelUsed,
               });
             }
           }),

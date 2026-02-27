@@ -28,6 +28,8 @@ export const generateRequestSchema = z.object({
   outfit: z.string().max(200).nullable(),
   mood: z.string().max(200).nullable(),
   count: z.number().int().min(1).max(8),
+  model: z.enum(['pro', 'nb2']).default('nb2'),
+  abTest: z.boolean().default(false),
 });
 
 export type GenerateRequest = z.infer<typeof generateRequestSchema>;

@@ -1,4 +1,9 @@
-const MODEL = "gemini-3-pro-image-preview";
+const MODEL_MAP = {
+  pro: 'gemini-3-pro-image-preview',
+  nb2: 'gemini-3.1-flash-image-preview',
+} as const;
+type ModelChoice = keyof typeof MODEL_MAP;
+
 const ANALYSIS_MODEL = "gemini-2.0-flash";
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 
@@ -20,11 +25,14 @@ export interface GeminiResponse {
   }>;
 }
 
+export type { ModelChoice };
+
 export async function callGemini(
   parts: GeminiPart[],
   apiKey: string,
+  model: ModelChoice = 'nb2',
 ): Promise<GeminiResponse> {
-  const url = `${API_BASE}/${MODEL}:generateContent?key=${apiKey}`;
+  const url = `${API_BASE}/${MODEL_MAP[model]}:generateContent?key=${apiKey}`;
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

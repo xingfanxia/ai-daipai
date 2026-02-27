@@ -14,6 +14,10 @@ export interface GenerationConfig {
   outfit: string | null;
   mood: string | null;
   count: number;
+  /** Which generation model to use */
+  model?: 'pro' | 'nb2';
+  /** When true, each photo is generated with BOTH models for A/B comparison */
+  abTest?: boolean;
 }
 
 export type GenerationResult =
@@ -25,7 +29,7 @@ export type SSEEvent =
   | { event: "photo_started"; data: { index: number } }
   | {
       event: "photo_completed";
-      data: { index: number; imageId: string; previewUrl: string };
+      data: { index: number; imageId: string; previewUrl: string; model?: string };
     }
   | { event: "photo_failed"; data: { index: number; error: string } }
   | {

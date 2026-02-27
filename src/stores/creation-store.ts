@@ -18,6 +18,8 @@ interface CreationState {
   outfit: string | null;
   mood: string | null;
   photoCount: number;
+  model: 'pro' | 'nb2';
+  abTest: boolean;
 
   // Step 3: Generation
   sessionId: string | null;
@@ -35,6 +37,8 @@ interface CreationState {
   setOutfit: (outfit: string | null) => void;
   setMood: (mood: string | null) => void;
   setPhotoCount: (count: number) => void;
+  setModel: (model: 'pro' | 'nb2') => void;
+  setAbTest: (abTest: boolean) => void;
   applyPackage: (sceneId: string, styleId: PhotoStyle, outfitId: string, moodId: string) => void;
   startGeneration: (sessionId: string) => void;
   addGeneratedPhoto: (result: GenerationResult) => void;
@@ -52,6 +56,8 @@ const initialState = {
   outfit: null,
   mood: null,
   photoCount: 4,
+  model: 'nb2' as const,
+  abTest: false,
   sessionId: null,
   generatedPhotos: [],
   generationStatus: "idle" as GenerationStatus,
@@ -80,6 +86,8 @@ export const useCreationStore = create<CreationState>((set) => ({
   setOutfit: (outfit) => set({ outfit }),
   setMood: (mood) => set({ mood }),
   setPhotoCount: (count) => set({ photoCount: Math.max(1, Math.min(8, count)) }),
+  setModel: (model) => set({ model }),
+  setAbTest: (abTest) => set({ abTest }),
 
   applyPackage: (sceneId, styleId, outfitId, moodId) => set({
     scene: { type: "preset", presetId: sceneId },

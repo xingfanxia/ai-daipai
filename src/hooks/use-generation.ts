@@ -19,7 +19,11 @@ export function useGeneration() {
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(config),
+        body: JSON.stringify({
+          ...config,
+          model: config.model ?? 'pro',
+          abTest: config.abTest ?? false,
+        }),
         signal: controller.signal,
       });
 

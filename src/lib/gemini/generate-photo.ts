@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 
 import { callGemini } from "@/lib/gemini/client";
+import type { ModelChoice } from "@/lib/gemini/client";
 
 interface RefImage {
   mimeType: string;
@@ -13,6 +14,7 @@ export async function generateSinglePhoto(opts: {
   refImages: RefImage[];
   sceneImages?: RefImage[];
   index: number;
+  model?: ModelChoice;
 }): Promise<{ imageData: Buffer; id: string } | { error: string }> {
   // Order: prompt → person refs → scene refs (NO inspiration images)
   const parts = [
@@ -26,7 +28,7 @@ export async function generateSinglePhoto(opts: {
   ];
 
   try {
-    const data = await callGemini(parts, opts.apiKey);
+    const data = await callGemini(parts, opts.apiKey, opts.model);
     const candidate = data.candidates?.[0];
     const imagePart = candidate?.content?.parts?.find((p) => p.inlineData);
 
